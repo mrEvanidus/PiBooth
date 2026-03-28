@@ -192,13 +192,13 @@ def photoButtonPress(event):
 
     # Tweet the photos
     if tweet_photos:
-        print tweet_text
-        print ".txt" in tweet_text
+        print( tweet_text )
+        print( ".txt" in tweet_text )
         if ".txt" in tweet_text:
             try:
                 text = getRandomTweet(tweet_text)
             except:
-                print "Error getting random tweet!"
+                print( "Error getting random tweet!" )
                 text = "Photo booth photos!"
         else:
             text = tweet_text
@@ -402,7 +402,7 @@ outputToggle(ledPin, True)  # Turn on the camera "power" LED
 while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print "QUIT event detected"
+            print( "QUIT event detected" )
             safeClose()
             sys.exit()
 
@@ -417,26 +417,26 @@ while 1:
                 photoBrightness += 1
                 previewBrightness += 1
                 camera.brightness = previewBrightness
-                print "New brightness (preview/photo): %d/%d" % (
-                        photoBrightness, previewBrightness)
+                print( "New brightness (preview/photo): %d/%d" % (
+                        photoBrightness, previewBrightness) )
 
             if event.key == pygame.K_DOWN:
                 photoBrightness -= 1
                 previewBrightness -= 1
                 camera.brightness = previewBrightness
-                print "New brightness (preview/photo): %d/%d" % (
-                        photoBrightness, previewBrightness)
+                print( "New brightness (preview/photo): %d/%d" % (
+                        photoBrightness, previewBrightness) )
 
             # Adjust contrast with the right and left arrows
             if event.key == pygame.K_RIGHT:
                 photoContrast += 1
                 camera.contrast = photoContrast
-                print "New contrast: %d" % (photoContrast)
+                print( "New contrast: %d" % (photoContrast) )
 
             if event.key == pygame.K_LEFT:
                 photoContrast -= 1
                 camera.contrast = photoContrast
-                print "New contrast: %d" % (photoContrast)
+                print( "New contrast: %d" % (photoContrast) )
 
         else:
             pass
