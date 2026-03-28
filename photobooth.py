@@ -370,9 +370,9 @@ tinyfont = pygame.font.Font(None, 300)
 
 # Setup camera
 camera = Picamera2()
-config = camera.create_preview_configuration(main={"size": (1296,972)}, sensor={'output_size': (1296, 972)} )
+config = camera.create_preview_configuration(main={"size": (4608,2592)}, sensor={'output_size': (4608, 2592)} )
 camera.configure(config)
-camera.start_preview(Preview.QTGL)
+camera.start_preview(Preview.QTGL, x = 0, y=0, width=800, height=400)
 #camera.resolution = (2592, 1944)  # 1280,720 also works for some setups
 #camera.framerate = 10  # slower is necessary for high-resolution
 #camera.brightness = previewBrightness  # Turned up so the black isn't too dark
