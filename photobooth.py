@@ -118,8 +118,8 @@ def takePhoto():
     # Grab the capture
     time_stamp = strftime("%Y_%m_%dT%H_%M_%S", gmtime())
     path = "/home/pi/photobooth_photos/%s.jpg" % time_stamp
-    if play_shutter_sound:
-        shutter_sound.play()
+    #if play_shutter_sound:
+    #    shutter_sound.play()
 
     # Unflip the photo so it is correct when taken
     camera.hflip = False
@@ -318,7 +318,7 @@ def safeClose():
 tweet_photos = True  # Turn on/off photo tweeting
 number_photos = 3  # Number of pictures taken after each activation
 tweet_text = "tweet_options.txt"  # Default text or file of tweets
-play_shutter_sound = True  # Turn on/off shutter sound effects
+play_shutter_sound = False  # Turn on/off shutter sound effects
 photo_path = '/home/pi/photobooth_photos'  # Where photos will be stored
 CONSUMER_KEY = "YOUR_KEY_HERE"  # Keys from twitter
 CONSUMER_SECRET = "YOUR_KEY_HERE"  # Keys from twitter
@@ -346,8 +346,8 @@ if tweet_photos:
 # the path, but here it's really very simple.
 
 pygame.init()
-pygame.mixer.init()
-shutter_sound = pygame.mixer.Sound("/home/pi/PiBooth/shutter_sound.wav")
+#pygame.mixer.init()
+#shutter_sound = pygame.mixer.Sound("/home/pi/PiBooth/shutter_sound.wav")
 
 # Pin configuration
 ledPin = 19  # GPIO of the indicator LED
