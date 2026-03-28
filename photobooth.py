@@ -171,8 +171,8 @@ def photoButtonPress(event):
     # Wait for 0.1 sec to be sure it's a person pressing the
     # button, not noise.
     sleep(0.1)
-    if GPIO.input(photobuttonPin) != GPIO.LOW:
-        return
+    #if GPIO.input(photobuttonPin) != GPIO.LOW:
+    #    return
 
     # Turn on the lights and let people adjust
     sleep(1)
@@ -315,7 +315,7 @@ def safeClose():
 
 # Setup Parameters
 # Only change things here unless you want to dig into the program
-tweet_photos = True  # Turn on/off photo tweeting
+tweet_photos = False  # Turn on/off photo tweeting
 number_photos = 3  # Number of pictures taken after each activation
 tweet_text = "tweet_options.txt"  # Default text or file of tweets
 play_shutter_sound = False  # Turn on/off shutter sound effects
