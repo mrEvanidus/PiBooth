@@ -380,7 +380,7 @@ camera.start_preview(Preview.QTGL)
 #camera.hflip = True
 #camera.vflip = False
 camera.start()
-time.sleep(2)
+sleep(2)
 
 # Fill screen
 screen.fill(black)
