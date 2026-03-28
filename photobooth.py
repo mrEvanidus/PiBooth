@@ -439,7 +439,8 @@ while 1:
                 print( "New contrast: %d" % (photoContrast) )
                 
             if event.key == pygame.K_SPACE:
-                photoButtonPress(event) )
+                photoButtonPress(event)
+                print( "Photo taken.")
 
         else:
             pass
