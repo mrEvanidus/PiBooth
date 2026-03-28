@@ -125,7 +125,7 @@ def takePhoto():
     camera.hflip = False
 
     # Take the photo
-    camera.capture(path)
+    camera.capture_file(path)
 
     # Go back to flipped preview
     camera.hflip = True
