@@ -1,6 +1,6 @@
 import sys
 import pygame
-import picamera2
+from picamera2 import Picamera2, Preview
 import random
 import RPi.GPIO as GPIO
 from time import sleep, strftime, gmtime
@@ -369,8 +369,10 @@ smfont = pygame.font.Font(None, 600)
 tinyfont = pygame.font.Font(None, 300)
 
 # Setup camera
-camera = picamera2.Picamera2()
-camera.configure()
+camera = Picamera2()
+config = camera.create_preview_configuration(main={"size": (1296,972)}, sensor={'output_size': (1296, 972)} )
+camera.configure(config)
+camera.start_preview(Preview.QTGL)
 #camera.resolution = (2592, 1944)  # 1280,720 also works for some setups
 #camera.framerate = 10  # slower is necessary for high-resolution
 #camera.brightness = previewBrightness  # Turned up so the black isn't too dark
@@ -378,6 +380,7 @@ camera.configure()
 #camera.hflip = True
 #camera.vflip = False
 camera.start()
+time.sleep(2)
 
 # Fill screen
 screen.fill(black)
