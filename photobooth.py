@@ -1,6 +1,6 @@
 import sys
 import pygame
-import picamera
+import picamera2
 import random
 import RPi.GPIO as GPIO
 from time import sleep, strftime, gmtime
@@ -369,7 +369,7 @@ smfont = pygame.font.Font(None, 600)
 tinyfont = pygame.font.Font(None, 300)
 
 # Setup camera
-camera = picamera.PiCamera()
+camera = picamera2.Picamera2()
 camera.resolution = (2592, 1944)  # 1280,720 also works for some setups
 camera.framerate = 10  # slower is necessary for high-resolution
 camera.brightness = previewBrightness  # Turned up so the black isn't too dark
