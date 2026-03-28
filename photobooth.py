@@ -376,7 +376,7 @@ camera.brightness = previewBrightness  # Turned up so the black isn't too dark
 camera.preview_alpha = 210  # Set transparency so we can see the countdown
 camera.hflip = True
 camera.vflip = False
-camera.start_preview()
+camera.start()
 
 # Fill screen
 screen.fill(black)
