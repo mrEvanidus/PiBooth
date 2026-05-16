@@ -199,7 +199,7 @@ def build_strip(photos_pil, border):
                       fill=ac, width=1)
 
     # ── date stamp at bottom ────────────────────────────────
-    date_str = datetime.now().strftime("%d %b %Y  •  %H:%M")
+    date_str = datetime.now().strftime("%d %b %Y  |  %H:%M")
     # Pillow default font is tiny – that's fine for a small stamp
     draw.text((outer_w // 2, outer_h - 22), date_str,
               fill=border["accent"], anchor="mm")
