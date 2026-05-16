@@ -516,10 +516,13 @@ class PhotoBooth:
                                         self.photos_pil, BORDERS[idx]
                                     )
                                 elif key == "retake":
-                                    self.state = self.STATE_HOME
+                                    self.state = self.STATE_CAPTURE
                                     self.photos_pil = []
                                 elif key == "save":
                                     self.save_strip()
+                                    time.sleep(3)
+                                    self.state = self.STATE_HOME
+
 
             # ── Draw current state ────────────────────────────
             btn_rects = {}
