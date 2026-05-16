@@ -120,6 +120,7 @@ BORDERS = [
     },
 ]
 
+
 # ═══════════════════════════════════════════════════════════
 #  HELPER: draw a rounded rectangle (pygame doesn't have one)
 # ═══════════════════════════════════════════════════════════
@@ -355,7 +356,7 @@ class PhotoBooth:
         pygame.draw.circle(self.screen, (30, 30, 60), (SCREEN_W - 80, 80), 120)
         pygame.draw.circle(self.screen, (30, 30, 60), (80, SCREEN_H - 80), 90)
 
-        draw_text_centred(self.screen, "📷  PHOTO BOOTH",
+        draw_text_centred(self.screen, "PHOTO BOOTH",
                           self.font_large, WHITE, SCREEN_W // 2, SCREEN_H // 2 - 60)
         draw_text_centred(self.screen, "Touch START to begin",
                           self.font_small, (160, 160, 180),
@@ -468,9 +469,9 @@ class PhotoBooth:
 
         # ── Save & Retake buttons ─────────────────────────────
         bottom_y = SCREEN_H - 55
-        save_rect  = self.draw_button("💾 Save",   btn_cx - 95, bottom_y,
+        save_rect  = self.draw_button("Save",   btn_cx - 95, bottom_y,
                                       w=160, h=50, bg=(60, 100, 180))
-        again_rect = self.draw_button("🔄 Retake", btn_cx + 95, bottom_y,
+        again_rect = self.draw_button("Retake", btn_cx + 95, bottom_y,
                                       w=160, h=50, bg=(180, 60, 60))
         btn_rects["save"]   = save_rect
         btn_rects["retake"] = again_rect
