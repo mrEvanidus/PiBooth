@@ -447,25 +447,42 @@ class PhotoBooth:
 
         btn_cx = strip_area_w + (SCREEN_W - strip_area_w) // 2
         btn_rects = {}
-        # Arrange border buttons in a 2-column mini grid
-        cols = 2
-        bw, bh = 155, 44
-        hgap, vgap = 10, 8
-        total_cols_w = cols * bw + (cols - 1) * hgap
-        start_x = btn_cx - total_cols_w // 2
+        
+        
+        # # Arrange border buttons in a 2-column mini grid
+        # cols = 2
+        # bw, bh = 155, 44
+        # hgap, vgap = 10, 8
+        # total_cols_w = cols * bw + (cols - 1) * hgap
+        # start_x = btn_cx - total_cols_w // 2
 
-        for idx, b in enumerate(BORDERS):
-            col = idx % cols
-            row = idx // cols
-            bx = start_x + col * (bw + hgap) + bw // 2
-            by = 115 + row * (bh + vgap) + bh // 2
-            active = (idx == self.current_border)
-            bg_col  = b["accent"] if active else b["inner"]
-            txt_col = b["bg"]     if active else b["text"]
-            r = self.draw_button(b["name"], bx, by, w=bw, h=bh,
-                                 bg=b["inner"], hover_bg=b["accent"],
-                                 text_col=txt_col, active=active, radius=10)
-            btn_rects[f"border_{idx}"] = r
+        # for idx, b in enumerate(BORDERS):
+        #     col = idx % cols
+        #     row = idx // cols
+        #     bx = start_x + col * (bw + hgap) + bw // 2
+        #     by = 115 + row * (bh + vgap) + bh // 2
+        #     active = (idx == self.current_border)
+        #     bg_col  = b["accent"] if active else b["inner"]
+        #     txt_col = b["bg"]     if active else b["text"]
+        #     r = self.draw_button(b["name"], bx, by, w=bw, h=bh,
+        #                          bg=b["inner"], hover_bg=b["accent"],
+        #                          text_col=txt_col, active=active, radius=10)
+        #     btn_rects[f"border_{idx}"] = r
+
+        # ── Border cycle buttons ──────────────────────────────────
+        border_name = BORDERS[self.current_border]["name"]
+        draw_text_centred(self.screen, border_name,
+                        self.font_small, border["text"],
+                        btn_cx, 130)
+
+        prev_rect = self.draw_button("< Prev", btn_cx - 95, 180,
+                                    w=150, h=50, bg=border["inner"],
+                                    text_col=border["text"], radius=10)
+        next_rect = self.draw_button("Next >", btn_cx + 95, 180,
+                                    w=150, h=50, bg=border["inner"],
+                                    text_col=border["text"], radius=10)
+        btn_rects["prev_border"] = prev_rect
+        btn_rects["next_border"] = next_rect
 
         # ── Save & Retake buttons ─────────────────────────────
         bottom_y = SCREEN_H - 55
@@ -508,20 +525,26 @@ class PhotoBooth:
                     elif self.state == self.STATE_STRIP:
                         for key, rect in btn_rects.items():
                             if rect.collidepoint(pos):
-                                if key.startswith("border_"):
-                                    idx = int(key.split("_")[1])
-                                    self.current_border = idx
-                                    # Rebuild strip with new border
-                                    self.strip_surface = build_strip(
-                                        self.photos_pil, BORDERS[idx]
-                                    )
-                                elif key == "retake":
+                                # if key.startswith("border_"):
+                                #     idx = int(key.split("_")[1])
+                                #     self.current_border = idx
+                                #     # Rebuild strip with new border
+                                #     self.strip_surface = build_strip(
+                                #         self.photos_pil, BORDERS[idx]
+                                #     )
+                                if key == "retake":
                                     self.state = self.STATE_CAPTURE
                                     self.photos_pil = []
                                 elif key == "save":
                                     self.save_strip()
                                     time.sleep(3)
                                     self.state = self.STATE_HOME
+                                elif key == "prev_border":
+                                    self.current_border = (self.current_border - 1) % len(BORDERS)
+                                    self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
+                                elif key == "next_border":
+                                    self.current_border = (self.current_border + 1) % len(BORDERS)
+                                    self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
 
 
             # ── Draw current state ────────────────────────────
