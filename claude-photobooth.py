@@ -262,6 +262,7 @@ class PhotoBooth:
         self.flash_alpha     = 0           # shutter flash opacity
         self.preview_frame   = None        # latest camera frame (Surface)
         self.capturing       = False       # thread guard
+        self.photo_countdown = 0           # seconds remaining until next shot
 
         # ── output directory ───────────────────────────────
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -306,25 +307,44 @@ class PhotoBooth:
     #  CAPTURE SEQUENCE  (runs in a background thread)
     # ─────────────────────────────────────────────────────────
     def capture_sequence(self):
-        """Takes NUM_PHOTOS with INTER_PHOTO_DELAY seconds between each."""
         self.photos_pil = []
         for i in range(NUM_PHOTOS):
-            # Trigger flash effect on main thread via flag
+            # Countdown before each photo
+            for t in range(INTER_PHOTO_DELAY, 0, -1):
+                self.photo_countdown = t
+                time.sleep(1)
+
+            self.photo_countdown = 0
             self.flash_alpha = 255
             img = self.take_photo()
             self.photos_pil.append(img)
 
-            # Save full-res image to disk
             fname = datetime.now().strftime("photo_%Y%m%d_%H%M%S") + f"_{i+1}.jpg"
             img.save(os.path.join(OUTPUT_DIR, fname))
 
-            if i < NUM_PHOTOS - 1:
-                time.sleep(INTER_PHOTO_DELAY)
-
-        # Build the strip and switch state
         self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
         self.state = self.STATE_STRIP
         self.capturing = False
+    # def capture_sequence(self):
+    #     """Takes NUM_PHOTOS with INTER_PHOTO_DELAY seconds between each."""
+    #     self.photos_pil = []
+    #     for i in range(NUM_PHOTOS):
+    #         # Trigger flash effect on main thread via flag
+    #         self.flash_alpha = 255
+    #         img = self.take_photo()
+    #         self.photos_pil.append(img)
+
+    #         # Save full-res image to disk
+    #         fname = datetime.now().strftime("photo_%Y%m%d_%H%M%S") + f"_{i+1}.jpg"
+    #         img.save(os.path.join(OUTPUT_DIR, fname))
+
+    #         if i < NUM_PHOTOS - 1:
+    #             time.sleep(INTER_PHOTO_DELAY)
+
+    #     # Build the strip and switch state
+    #     self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
+    #     self.state = self.STATE_STRIP
+    #     self.capturing = False
 
     # ─────────────────────────────────────────────────────────
     #  BUTTON FACTORY
@@ -412,12 +432,25 @@ class PhotoBooth:
             self.screen.blit(flash_surf, (0, 0))
             self.flash_alpha = max(0, self.flash_alpha - 25)
 
-        # Photo counter
+        # Photo counter at top of screen
         taken = len(self.photos_pil)
         draw_text_centred(self.screen,
                           f"Photo {taken + 1} of {NUM_PHOTOS}",
                           self.font_medium, WHITE,
                           SCREEN_W // 2, 40)
+        
+        # Before each photo is captured, display another countdown sequence with some fun messages
+        if self.photo_countdown > 0:
+            draw_text_centred(self.screen, str(self.photo_countdown),
+                            self.font_huge, COUNTDOWN_COL,
+                            SCREEN_W // 2, SCREEN_H // 2)
+            draw_text_centred(self.screen, "Next photo in…",
+                            self.font_medium, WHITE,
+                            SCREEN_W // 2, SCREEN_H // 2 + 110)
+        else:
+            draw_text_centred(self.screen, "Smile!",
+                            self.font_large, COUNTDOWN_COL,
+                            SCREEN_W // 2, SCREEN_H // 2)
 
     def draw_strip(self):
         border = BORDERS[self.current_border]
@@ -447,27 +480,6 @@ class PhotoBooth:
 
         btn_cx = strip_area_w + (SCREEN_W - strip_area_w) // 2
         btn_rects = {}
-        
-        
-        # # Arrange border buttons in a 2-column mini grid
-        # cols = 2
-        # bw, bh = 155, 44
-        # hgap, vgap = 10, 8
-        # total_cols_w = cols * bw + (cols - 1) * hgap
-        # start_x = btn_cx - total_cols_w // 2
-
-        # for idx, b in enumerate(BORDERS):
-        #     col = idx % cols
-        #     row = idx // cols
-        #     bx = start_x + col * (bw + hgap) + bw // 2
-        #     by = 115 + row * (bh + vgap) + bh // 2
-        #     active = (idx == self.current_border)
-        #     bg_col  = b["accent"] if active else b["inner"]
-        #     txt_col = b["bg"]     if active else b["text"]
-        #     r = self.draw_button(b["name"], bx, by, w=bw, h=bh,
-        #                          bg=b["inner"], hover_bg=b["accent"],
-        #                          text_col=txt_col, active=active, radius=10)
-        #     btn_rects[f"border_{idx}"] = r
 
         # ── Border cycle buttons ──────────────────────────────────
         border_name = BORDERS[self.current_border]["name"]
@@ -533,8 +545,9 @@ class PhotoBooth:
                                 #         self.photos_pil, BORDERS[idx]
                                 #     )
                                 if key == "retake":
-                                    self.state = self.STATE_CAPTURE
+                                    self.state = self.STATE_COUNTDOWN
                                     self.photos_pil = []
+                                    self.countdown_start = time.time()
                                 elif key == "save":
                                     self.save_strip()
                                     time.sleep(3)
@@ -588,33 +601,11 @@ class PhotoBooth:
             msg = "Save failed! Check terminal."
 
         # On-screen confirmation
-        overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 200))
-        self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
-        draw_text_centred(self.screen, msg,
-                        self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
-        pygame.display.flip()
-        time.sleep(1.8)
-        # if not self.photos_pil:
-        #     return
-        # border = BORDERS[self.current_border]
-        # fname = datetime.now().strftime("strip_%Y%m%d_%H%M%S") + ".jpg"
-        # path  = os.path.join(OUTPUT_DIR, fname)
-        # # Re-render strip at full resolution (no scaling) and save
-        # full_strip = build_strip(self.photos_pil, border)
-        # # Convert pygame Surface → PIL → save
-        # raw  = pygame.image.tostring(full_strip, "RGB")
-        # w, h = full_strip.get_size()
-        # pil  = Image.frombytes("RGB", (w, h), raw)
-        # pil.save(path, quality=92)
-        # print(f"[PhotoBooth] Strip saved → {path}")
-
-        # # Brief on-screen confirmation
         # overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
         # overlay.fill((0, 0, 0, 200))
         # self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
-        # draw_text_centred(self.screen, f"Saved! → {fname}",
-        #                   self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
+        # draw_text_centred(self.screen, msg,
+        #                 self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
         # pygame.display.flip()
         # time.sleep(1.8)
 
