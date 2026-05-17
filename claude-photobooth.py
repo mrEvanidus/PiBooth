@@ -246,7 +246,7 @@ class PhotoBooth:
         self.cam = Picamera2()
         # Preview config: YUV420 for fast display
         preview_cfg = self.cam.create_preview_configuration(
-            main={"size": (PREVIEW_W, PREVIEW_H), "format": "RGB888"}
+            main={"size": (PREVIEW_W, PREVIEW_H), "format": "R888"}
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
@@ -287,7 +287,7 @@ class PhotoBooth:
     #  CAMERA HELPERS
     # ─────────────────────────────────────────────────────────
     def grab_preview_frame(self):
-        """Capture a single RGB frame and return as pygame Surface."""
+        """Capture a single BRG frame and return as pygame Surface."""
         arr = self.cam.capture_array("main")
         # arr shape: (H, W, 3)
         surf = pygame.surfarray.make_surface(arr.swapaxes(0, 1))
