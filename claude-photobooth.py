@@ -335,6 +335,7 @@ class PhotoBooth:
             img = self.take_photo()
             self.photos_pil.append(img)
 
+            # save each photo as it's taken
             fname = datetime.now().strftime("photo_%Y%m%d_%H%M%S") + f"_{i+1}.jpg"
             img.save(os.path.join(OUTPUT_DIR, fname))
 
@@ -391,7 +392,7 @@ class PhotoBooth:
 
         # Darkening overlay
         overlay = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 120))
+        overlay.fill((0, 0, 0, 200))
         self.screen.blit(overlay, (0, 0))
 
         # Countdown number
@@ -421,6 +422,19 @@ class PhotoBooth:
         frame = self.grab_preview_frame()
         self.screen.blit(frame, (0, 0))
 
+                # Before each photo is captured, display another countdown sequence with some fun messages
+        if self.photo_countdown > 0:
+            draw_text_centred(self.screen, str(self.photo_countdown),
+                            self.font_huge, COUNTDOWN_COL,
+                            SCREEN_W // 2, SCREEN_H // 2)
+            draw_text_centred(self.screen, "Next photo in…",
+                            self.font_medium, WHITE,
+                            SCREEN_W // 2, SCREEN_H // 2 + 110)
+        else:
+            draw_text_centred(self.screen, "Smile!",
+                            self.font_large, COUNTDOWN_COL,
+                            SCREEN_W // 2, SCREEN_H // 2)
+        
         # Flash effect
         if self.flash_alpha > 0:
             flash_surf = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
@@ -435,18 +449,7 @@ class PhotoBooth:
                           self.font_medium, WHITE,
                           SCREEN_W // 2, 40)
         
-        # Before each photo is captured, display another countdown sequence with some fun messages
-        if self.photo_countdown > 0:
-            draw_text_centred(self.screen, str(self.photo_countdown),
-                            self.font_huge, COUNTDOWN_COL,
-                            SCREEN_W // 2, SCREEN_H // 2)
-            draw_text_centred(self.screen, "Next photo in…",
-                            self.font_medium, WHITE,
-                            SCREEN_W // 2, SCREEN_H // 2 + 110)
-        else:
-            draw_text_centred(self.screen, "Smile!",
-                            self.font_large, COUNTDOWN_COL,
-                            SCREEN_W // 2, SCREEN_H // 2)
+
 
     def draw_strip(self):
         border = BORDERS[self.current_border]
