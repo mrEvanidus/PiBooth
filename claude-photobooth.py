@@ -312,7 +312,7 @@ class PhotoBooth:
         # Back to preview
         self.cam.stop()
         preview_cfg = self.cam.create_preview_configuration(
-            main={"size": (PREVIEW_W, PREVIEW_H), "format": "RGB888"}
+            main={"size": (PREVIEW_W, PREVIEW_H), "format": "BRG888"}
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
@@ -605,9 +605,9 @@ class PhotoBooth:
             path  = os.path.join(OUTPUT_DIR, fname)
 
             # Save via the already-rendered strip surface rather than re-building
-            raw  = pygame.image.tostring(self.strip_surface, "RGB")
+            raw  = pygame.image.tostring(self.strip_surface, "BRG")
             w, h = self.strip_surface.get_size()
-            pil  = Image.frombytes("RGB", (w, h), raw)
+            pil  = Image.frombytes("BRG", (w, h), raw)
             pil.save(path, quality=92)
             print(f"[PhotoBooth] Strip saved → {path}")
             msg = f"Saved to {OUTPUT_DIR}"
