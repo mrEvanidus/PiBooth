@@ -250,21 +250,21 @@ class PhotoBooth:
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
-        # time.sleep(2)   # auto-white balance needs some time to settle
+        time.sleep(2)   # auto-white balance needs some time to settle
 
-        # # Force white balance to a warm indoor preset instead of leaving
-        # # it on auto, which tends to drift blue/purple under artificial light.
-        # # >>> Options: "auto", "incandescent", "tungsten", "fluorescent",
-        # #              "indoor", "daylight", "cloudy"
-        # self.cam.set_controls({
-        #     "AwbMode":        4,           # 4 = indoor  >>> change if needed
-        #     "AwbEnable":      False,       # disable auto white balance
-        #     "ColourGains":    (2.2, 1.4),  # (RedGain, BlueGain)
-        #     "Brightness":     0.05,        # >>> slight lift, range -1.0 to 1.0
-        #     "Contrast":       1.1,         # >>> gentle boost, 1.0 is neutral
-        #     "Saturation":     1.2,         # >>> richens colours without oversaturating
-        #     "Sharpness":      1.5,         # >>> 1.0 is neutral
-        # })
+        # Force white balance to a warm indoor preset instead of leaving
+        # it on auto, which tends to drift blue/purple under artificial light.
+        # >>> Options: "auto", "incandescent", "tungsten", "fluorescent",
+        #              "indoor", "daylight", "cloudy"
+        self.cam.set_controls({
+            "AwbMode":        4,           # 4 = indoor  >>> change if needed
+            "AwbEnable":      True,       # disable auto white balance
+            #"ColourGains":    (2.2, 1.4),  # (RedGain, BlueGain)
+            "Brightness":     0.05,        # >>> slight lift, range -1.0 to 1.0
+            "Contrast":       1.1,         # >>> gentle boost, 1.0 is neutral
+            "Saturation":     1.2,         # >>> richens colours without oversaturating
+            "Sharpness":      1.5,         # >>> 1.0 is neutral
+        })
         time.sleep(1)   # let camera settle
 
 
