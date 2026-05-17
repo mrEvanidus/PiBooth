@@ -52,7 +52,7 @@ CAPTURE_W, CAPTURE_H = 1280, 960   # >>> e.g. (1920, 1440) for full quality
 PREVIEW_W, PREVIEW_H = 800, 480
 
 # Output directory for saved strip images
-OUTPUT_DIR = os.path.expanduser("~/photobooth_output")
+OUTPUT_DIR = "./output"
 
 # Strip thumbnail size – each photo inside the strip
 THUMB_W, THUMB_H = 320, 240   # >>> wider strip: increase THUMB_W
