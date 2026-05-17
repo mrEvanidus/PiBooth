@@ -246,7 +246,7 @@ class PhotoBooth:
         self.cam = Picamera2()
         # Preview config: YUV420 for fast display
         preview_cfg = self.cam.create_preview_configuration(
-            main={"size": (PREVIEW_W, PREVIEW_H), "format": "R888"}
+            main={"size": (PREVIEW_W, PREVIEW_H), "format": "BRG888"}
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
