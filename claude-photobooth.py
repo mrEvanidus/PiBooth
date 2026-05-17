@@ -300,7 +300,7 @@ class PhotoBooth:
         """
         self.cam.stop()
         still_cfg = self.cam.create_still_configuration(
-            main={"size": (CAPTURE_W, CAPTURE_H), "format": "RGB888"}
+            main={"size": (CAPTURE_W, CAPTURE_H), "format": "BRG888"}
         )
         self.cam.configure(still_cfg)
         self.cam.start()
