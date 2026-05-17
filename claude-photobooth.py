@@ -246,7 +246,7 @@ class PhotoBooth:
         self.cam = Picamera2()
         # Preview config: YUV420 for fast display
         preview_cfg = self.cam.create_preview_configuration(
-            main={"size": (PREVIEW_W, PREVIEW_H), "format": "BRG888"}
+            main={"size": (PREVIEW_W, PREVIEW_H), "format": "BGR888"}
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
@@ -287,7 +287,7 @@ class PhotoBooth:
     #  CAMERA HELPERS
     # ─────────────────────────────────────────────────────────
     def grab_preview_frame(self):
-        """Capture a single BRG frame and return as pygame Surface."""
+        """Capture a single BGR frame and return as pygame Surface."""
         arr = self.cam.capture_array("main")
         # arr shape: (H, W, 3)
         surf = pygame.surfarray.make_surface(arr.swapaxes(0, 1))
@@ -300,7 +300,7 @@ class PhotoBooth:
         """
         self.cam.stop()
         still_cfg = self.cam.create_still_configuration(
-            main={"size": (CAPTURE_W, CAPTURE_H), "format": "BRG888"}
+            main={"size": (CAPTURE_W, CAPTURE_H), "format": "BGR888"}
         )
         self.cam.configure(still_cfg)
         self.cam.start()
@@ -312,7 +312,7 @@ class PhotoBooth:
         # Back to preview
         self.cam.stop()
         preview_cfg = self.cam.create_preview_configuration(
-            main={"size": (PREVIEW_W, PREVIEW_H), "format": "BRG888"}
+            main={"size": (PREVIEW_W, PREVIEW_H), "format": "BGR888"}
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
@@ -341,26 +341,6 @@ class PhotoBooth:
         self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
         self.state = self.STATE_STRIP
         self.capturing = False
-    # def capture_sequence(self):
-    #     """Takes NUM_PHOTOS with INTER_PHOTO_DELAY seconds between each."""
-    #     self.photos_pil = []
-    #     for i in range(NUM_PHOTOS):
-    #         # Trigger flash effect on main thread via flag
-    #         self.flash_alpha = 255
-    #         img = self.take_photo()
-    #         self.photos_pil.append(img)
-
-    #         # Save full-res image to disk
-    #         fname = datetime.now().strftime("photo_%Y%m%d_%H%M%S") + f"_{i+1}.jpg"
-    #         img.save(os.path.join(OUTPUT_DIR, fname))
-
-    #         if i < NUM_PHOTOS - 1:
-    #             time.sleep(INTER_PHOTO_DELAY)
-
-    #     # Build the strip and switch state
-    #     self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
-    #     self.state = self.STATE_STRIP
-    #     self.capturing = False
 
     # ─────────────────────────────────────────────────────────
     #  BUTTON FACTORY
