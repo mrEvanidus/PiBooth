@@ -578,9 +578,9 @@ class PhotoBooth:
             path  = os.path.join(OUTPUT_DIR, fname)
 
             # Save via the already-rendered strip surface rather than re-building
-            raw  = pygame.image.tostring(self.strip_surface, "BRG")
+            raw  = pygame.image.tostring(self.strip_surface, "RGB")
             w, h = self.strip_surface.get_size()
-            pil  = Image.frombytes("BRG", (w, h), raw)
+            pil  = Image.frombytes("RGB", (w, h), raw)
             pil.save(path, quality=92)
             print(f"[PhotoBooth] Strip saved → {path}")
             msg = f"Saved!"
