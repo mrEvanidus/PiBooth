@@ -250,21 +250,21 @@ class PhotoBooth:
         )
         self.cam.configure(preview_cfg)
         self.cam.start()
-        time.sleep(2)   # auto-white balance needs some time to settle
+        # time.sleep(2)   # auto-white balance needs some time to settle
 
-        # Force white balance to a warm indoor preset instead of leaving
-        # it on auto, which tends to drift blue/purple under artificial light.
-        # >>> Options: "auto", "incandescent", "tungsten", "fluorescent",
-        #              "indoor", "daylight", "cloudy"
-        self.cam.set_controls({
-            "AwbMode":        4,           # 4 = indoor  >>> change if needed
-            "AwbEnable":      False,       # disable auto white balance
-            "ColourGains":    (2.2, 1.4),  # (RedGain, BlueGain)
-            "Brightness":     0.05,        # >>> slight lift, range -1.0 to 1.0
-            "Contrast":       1.1,         # >>> gentle boost, 1.0 is neutral
-            "Saturation":     1.2,         # >>> richens colours without oversaturating
-            "Sharpness":      1.5,         # >>> 1.0 is neutral
-        })
+        # # Force white balance to a warm indoor preset instead of leaving
+        # # it on auto, which tends to drift blue/purple under artificial light.
+        # # >>> Options: "auto", "incandescent", "tungsten", "fluorescent",
+        # #              "indoor", "daylight", "cloudy"
+        # self.cam.set_controls({
+        #     "AwbMode":        4,           # 4 = indoor  >>> change if needed
+        #     "AwbEnable":      False,       # disable auto white balance
+        #     "ColourGains":    (2.2, 1.4),  # (RedGain, BlueGain)
+        #     "Brightness":     0.05,        # >>> slight lift, range -1.0 to 1.0
+        #     "Contrast":       1.1,         # >>> gentle boost, 1.0 is neutral
+        #     "Saturation":     1.2,         # >>> richens colours without oversaturating
+        #     "Sharpness":      1.5,         # >>> 1.0 is neutral
+        # })
         time.sleep(1)   # let camera settle
 
 
@@ -533,13 +533,6 @@ class PhotoBooth:
                     elif self.state == self.STATE_STRIP:
                         for key, rect in btn_rects.items():
                             if rect.collidepoint(pos):
-                                # if key.startswith("border_"):
-                                #     idx = int(key.split("_")[1])
-                                #     self.current_border = idx
-                                #     # Rebuild strip with new border
-                                #     self.strip_surface = build_strip(
-                                #         self.photos_pil, BORDERS[idx]
-                                #     )
                                 if key == "retake":
                                     self.state = self.STATE_COUNTDOWN
                                     self.photos_pil = []
@@ -590,20 +583,20 @@ class PhotoBooth:
             pil  = Image.frombytes("BRG", (w, h), raw)
             pil.save(path, quality=92)
             print(f"[PhotoBooth] Strip saved → {path}")
-            msg = f"Saved to {OUTPUT_DIR}"
+            msg = f"Saved!"
 
         except Exception as e:
             print(f"[PhotoBooth] Save error: {e}")
             msg = "Save failed! Check terminal."
 
         # On-screen confirmation
-        # overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
-        # overlay.fill((0, 0, 0, 200))
-        # self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
-        # draw_text_centred(self.screen, msg,
-        #                 self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
-        # pygame.display.flip()
-        # time.sleep(1.8)
+        overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 200))
+        self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
+        draw_text_centred(self.screen, msg,
+                        self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
+        pygame.display.flip()
+        time.sleep(1.8)
 
     # ─────────────────────────────────────────────────────────
     #  CLEANUP
