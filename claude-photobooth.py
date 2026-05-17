@@ -567,27 +567,56 @@ class PhotoBooth:
     # ─────────────────────────────────────────────────────────
     def save_strip(self):
         if not self.photos_pil:
+            print("[PhotoBooth] Save failed: no photos in memory")
             return
-        border = BORDERS[self.current_border]
-        fname = datetime.now().strftime("strip_%Y%m%d_%H%M%S") + ".jpg"
-        path  = os.path.join(OUTPUT_DIR, fname)
-        # Re-render strip at full resolution (no scaling) and save
-        full_strip = build_strip(self.photos_pil, border)
-        # Convert pygame Surface → PIL → save
-        raw  = pygame.image.tostring(full_strip, "RGB")
-        w, h = full_strip.get_size()
-        pil  = Image.frombytes("RGB", (w, h), raw)
-        pil.save(path, quality=92)
-        print(f"[PhotoBooth] Strip saved → {path}")
 
-        # Brief on-screen confirmation
+        try:
+            border = BORDERS[self.current_border]
+            fname = datetime.now().strftime("strip_%Y%m%d_%H%M%S") + ".jpg"
+            path  = os.path.join(OUTPUT_DIR, fname)
+
+            # Save via the already-rendered strip surface rather than re-building
+            raw  = pygame.image.tostring(self.strip_surface, "RGB")
+            w, h = self.strip_surface.get_size()
+            pil  = Image.frombytes("RGB", (w, h), raw)
+            pil.save(path, quality=92)
+            print(f"[PhotoBooth] Strip saved → {path}")
+            msg = f"Saved to {OUTPUT_DIR}"
+
+        except Exception as e:
+            print(f"[PhotoBooth] Save error: {e}")
+            msg = "Save failed! Check terminal."
+
+        # On-screen confirmation
         overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
-        draw_text_centred(self.screen, f"Saved! → {fname}",
-                          self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
+        draw_text_centred(self.screen, msg,
+                        self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
         pygame.display.flip()
         time.sleep(1.8)
+        # if not self.photos_pil:
+        #     return
+        # border = BORDERS[self.current_border]
+        # fname = datetime.now().strftime("strip_%Y%m%d_%H%M%S") + ".jpg"
+        # path  = os.path.join(OUTPUT_DIR, fname)
+        # # Re-render strip at full resolution (no scaling) and save
+        # full_strip = build_strip(self.photos_pil, border)
+        # # Convert pygame Surface → PIL → save
+        # raw  = pygame.image.tostring(full_strip, "RGB")
+        # w, h = full_strip.get_size()
+        # pil  = Image.frombytes("RGB", (w, h), raw)
+        # pil.save(path, quality=92)
+        # print(f"[PhotoBooth] Strip saved → {path}")
+
+        # # Brief on-screen confirmation
+        # overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
+        # overlay.fill((0, 0, 0, 200))
+        # self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
+        # draw_text_centred(self.screen, f"Saved! → {fname}",
+        #                   self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
+        # pygame.display.flip()
+        # time.sleep(1.8)
 
     # ─────────────────────────────────────────────────────────
     #  CLEANUP
