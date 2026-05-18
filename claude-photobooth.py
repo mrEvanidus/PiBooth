@@ -21,6 +21,7 @@ import time
 import io
 import threading
 from datetime import datetime
+import RPi.GPIO as GPIO
 
 # Pillow is used to composite the photo strip
 from PIL import Image, ImageDraw, ImageFilter
@@ -56,6 +57,10 @@ OUTPUT_DIR = "./output"
 
 # Strip thumbnail size – each photo inside the strip
 THUMB_W, THUMB_H = 320, 240   # >>> wider strip: increase THUMB_W
+
+# LED GPIO pin. configure as output and initialize low
+LED_PIN = 17
+
 
 # ─────────────────────────────────────────────
 #  COLOUR PALETTE
@@ -119,7 +124,6 @@ BORDERS = [
         "text":    (255, 180, 255),
     },
 ]
-
 
 # ═══════════════════════════════════════════════════════════
 #  HELPER: draw a rounded rectangle (pygame doesn't have one)
@@ -279,6 +283,7 @@ class PhotoBooth:
         self.preview_frame   = None        # latest camera frame (Surface)
         self.capturing       = False       # thread guard
         self.photo_countdown = 0           # seconds remaining until next shot
+        self.led_state       = False
 
         # ── output directory ───────────────────────────────
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -328,6 +333,7 @@ class PhotoBooth:
             # Countdown before each photo
             for t in range(INTER_PHOTO_DELAY, 0, -1):
                 self.photo_countdown = t
+                GPIO.output(LED_PIN,not self.led_state)
                 time.sleep(1)
 
             self.photo_countdown = 0
@@ -608,6 +614,7 @@ class PhotoBooth:
         print("[PhotoBooth] Shutting down…")
         self.cam.stop()
         pygame.quit()
+        GPIO.cleanup()
         sys.exit(0)
 
 
