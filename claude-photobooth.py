@@ -352,6 +352,9 @@ class PhotoBooth:
             fname = datetime.now().strftime("photo_%Y%m%d_%H%M%S") + f"_{i+1}.jpg"
             img.save(os.path.join(OUTPUT_DIR, fname))
 
+            self.led_state = False
+            GPIO.output(LED_PIN,self.led_state)
+
         self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
         self.state = self.STATE_STRIP
         self.capturing = False
