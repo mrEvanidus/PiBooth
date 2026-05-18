@@ -423,7 +423,7 @@ class PhotoBooth:
     # ─────────────────────────────────────────────────────────
     # draw_home
     # draws the graphical elements making up the start screen.
-    # returns the button for some reason (claude, explain?)
+    # returns the button for the event handler
     # ─────────────────────────────────────────────────────────
     def draw_home(self):
         # Background gradient (simple two-tone)
@@ -479,6 +479,10 @@ class PhotoBooth:
             #     t = threading.Thread(target=self.capture_sequence, daemon=True)
             #     t.start()
 
+    # ─────────────────────────────────────────────────────────
+    # draw_capture
+    # draws a flash element while the picture is being taken
+    # ─────────────────────────────────────────────────────────
     def draw_capture(self):
 
         # draw_text_centred(self.screen, "Smile!",
@@ -510,16 +514,20 @@ class PhotoBooth:
             self.screen.blit(flash_surf, (0, 0))
             self.flash_alpha = max(0, self.flash_alpha - 25)
 
-        # # Photo counter at top of screen
-        # taken = len(self.photos_pil)
-        # if (taken+1) < NUM_PHOTOS:
-        #     draw_text_centred(self.screen,
-        #                   f"Photo {taken + 1} of {NUM_PHOTOS}",
-        #                   self.font_medium, WHITE,
-        #                   SCREEN_W // 2, 40)
+        # Photo counter at top of screen
+        taken = len(self.photos_pil)
+        if (taken+1) < NUM_PHOTOS:
+            draw_text_centred(self.screen,
+                          f"Photo {taken + 1} of {NUM_PHOTOS}",
+                          self.font_medium, WHITE,
+                          SCREEN_W // 2, 40)
         
 
-
+    # ─────────────────────────────────────────────────────────
+    # draw_strip
+    # draws the graphical elements making up the end screen.
+    # returns the on-screen buttons for the event handler
+    # ─────────────────────────────────────────────────────────
     def draw_strip(self):
         border = BORDERS[self.current_border]
         self.screen.fill(border["bg"])
@@ -628,7 +636,6 @@ class PhotoBooth:
                                 
                                 elif key == "save":
                                     self.save_strip()
-                                    time.sleep(3)
                                     self.state = self.STATE_HOME
 
                                 elif key == "prev_border":
@@ -687,7 +694,7 @@ class PhotoBooth:
         draw_text_centred(self.screen, msg,
                         self.font_small, GREEN, SCREEN_W // 2, SCREEN_H // 2)
         pygame.display.flip()
-        time.sleep(1.8)
+        time.sleep(2)
 
     # ─────────────────────────────────────────────────────────
     #  CLEANUP
