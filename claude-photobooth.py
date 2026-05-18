@@ -59,7 +59,7 @@ OUTPUT_DIR = "./output"
 THUMB_W, THUMB_H = 320, 240   # >>> wider strip: increase THUMB_W
 
 # LED GPIO pin. configure as output and initialize low
-LED_PIN = GPIO.setmode
+LED_PIN = 17
 
 
 # ─────────────────────────────────────────────
