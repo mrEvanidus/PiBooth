@@ -357,12 +357,12 @@ class PhotoBooth:
                 self.countdown_val = SETUP_DELAY
                 self.countdown_start = time.time()
                 self.state = self.STATE_COUNTDOWN
-                led_blink(SETUP_DELAY)
+                led_blink(SETUP_DELAY+1)
             else :
                 self.countdown_val = INTER_PHOTO_DELAY
                 self.countdown_start = time.time()
                 self.state = self.STATE_COUNTDOWN
-                led_blink(INTER_PHOTO_DELAY)
+                led_blink(INTER_PHOTO_DELAY+1)
      
 
             # for t in range(INTER_PHOTO_DELAY, 0, -1):
