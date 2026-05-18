@@ -59,7 +59,7 @@ OUTPUT_DIR = "./output"
 THUMB_W, THUMB_H = 320, 240   # >>> wider strip: increase THUMB_W
 
 # LED GPIO pin. configure as output and initialize low
-LED_PIN = 17
+LED_PIN = GPIO.setmode
 
 
 # ─────────────────────────────────────────────
@@ -227,6 +227,12 @@ class PhotoBooth:
     STATE_STRIP     = "strip"
 
     def __init__(self):
+        
+        # Set up indicator LED
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(LED_PIN, GPIO.OUT)
+
+
         pygame.init()
 
         # Full-screen on the Pi touchscreen; use RESIZABLE for desktop testing
