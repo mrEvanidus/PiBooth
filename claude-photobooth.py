@@ -481,10 +481,10 @@ class PhotoBooth:
 
     def draw_capture(self):
 
-        draw_text_centred(self.screen, "Smile!",
-            self.font_large, COUNTDOWN_COL,
-            SCREEN_W // 2, SCREEN_H // 2)
-        time.sleep(1)
+        # draw_text_centred(self.screen, "Smile!",
+        #     self.font_large, COUNTDOWN_COL,
+        #     SCREEN_W // 2, SCREEN_H // 2)
+        # time.sleep(1)
 
         # Live preview while capture thread works
         frame = self.grab_preview_frame()
