@@ -303,7 +303,7 @@ class PhotoBooth:
         self.flash_alpha     = 0           # shutter flash opacity
         self.preview_frame   = None        # latest camera frame (Surface)
         self.capturing       = False       # thread guard
-        self.photo_countdown = 0           # seconds remaining until next shot
+        #self.photo_countdown = 0           # seconds remaining until next shot
         self.led_state       = False
 
         # ── output directory ───────────────────────────────
@@ -372,7 +372,7 @@ class PhotoBooth:
             #     time.sleep(1)
             
             # capture photo
-            self.photo_countdown = 0
+            # self.photo_countdown = 0
             self.flash_alpha = 255
             self.state = self.STATE_CAPTURE
             img = self.take_photo()
@@ -462,18 +462,17 @@ class PhotoBooth:
         elapsed = time.time() - self.countdown_start
         remaining = max(0, self.countdown_val - int(elapsed))
 
-        # if remaining > 0:
-        draw_text_centred(self.screen, str(remaining),
-                            self.font_huge, COUNTDOWN_COL,
-                            SCREEN_W // 2, SCREEN_H // 2)
-        draw_text_centred(self.screen, "Get ready…",
-                            self.font_medium, WHITE,
-                            SCREEN_W // 2, SCREEN_H // 2 + 110)
-        # else:
-        #     # Time's up – switch to capture
-        #     draw_text_centred(self.screen, "Smile!",
-        #                       self.font_large, COUNTDOWN_COL,
-        #                       SCREEN_W // 2, SCREEN_H // 2)
+        if remaining > 0:
+            draw_text_centred(self.screen, str(remaining),
+                                self.font_huge, COUNTDOWN_COL,
+                                SCREEN_W // 2, SCREEN_H // 2)
+            draw_text_centred(self.screen, "Get ready…",
+                                self.font_medium, WHITE,
+                                SCREEN_W // 2, SCREEN_H // 2 + 110)
+        else:
+            draw_text_centred(self.screen, "Smile!",
+                              self.font_large, COUNTDOWN_COL,
+                              SCREEN_W // 2, SCREEN_H // 2)
         #     self.state = self.STATE_CAPTURE
             # if not self.capturing:
             #     self.capturing = True
@@ -616,16 +615,26 @@ class PhotoBooth:
                         for key, rect in btn_rects.items():
                             if rect.collidepoint(pos):
                                 if key == "retake":
-                                    self.state = self.STATE_COUNTDOWN
-                                    self.photos_pil = []
-                                    self.countdown_start = time.time()
+                                    # self.state = self.STATE_COUNTDOWN
+                                    # self.photos_pil = []
+                                    # self.countdown_start = time.time()
+                                    # Restart the capture sequence, without saving
+                                    if not self.capturing:
+                                        self.capturing = True
+                                        t = threading.Thread(target=self.capture_sequence, daemon=True)
+                                        t.start()
+                                    else:
+                                        print(f"[PhotoBooth] Error: unable to start state machine")
+                                
                                 elif key == "save":
                                     self.save_strip()
                                     time.sleep(3)
                                     self.state = self.STATE_HOME
+
                                 elif key == "prev_border":
                                     self.current_border = (self.current_border - 1) % len(BORDERS)
                                     self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
+
                                 elif key == "next_border":
                                     self.current_border = (self.current_border + 1) % len(BORDERS)
                                     self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
