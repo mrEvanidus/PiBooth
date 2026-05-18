@@ -428,6 +428,7 @@ class PhotoBooth:
             draw_text_centred(self.screen, "Smile!",
                               self.font_large, COUNTDOWN_COL,
                               SCREEN_W // 2, SCREEN_H // 2)
+            time.sleep(1)
             self.state = self.STATE_CAPTURE
             if not self.capturing:
                 self.capturing = True
