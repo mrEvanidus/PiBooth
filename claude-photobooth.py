@@ -38,7 +38,7 @@ from picamera2 import Picamera2
 SCREEN_W, SCREEN_H = 800, 480
 
 # How many seconds to count down before taking photos
-COUNTDOWN_FROM = 5          # >>> change to 3 or 10 as preferred
+SETUP_DELAY = 5          # >>> change to 3 or 10 as preferred
 
 # How many photos to take per session
 NUM_PHOTOS = 3              # >>> change to 4 for a classic 4-photo strip
@@ -139,6 +139,21 @@ def draw_text_centred(surface, text, font, colour, cx, cy):
     rendered = font.render(text, True, colour)
     r = rendered.get_rect(center=(cx, cy))
     surface.blit(rendered, r)
+
+# ═══════════════════════════════════════════════════════════
+#  HELPER: sequence that flashes an LED
+# ═══════════════════════════════════════════════════════════
+def led_blink(delay):
+    start = time.time()
+    led_state = True
+    # blink an LED for the delay time
+    while (time.time() - start < delay):
+        GPIO.output(LED_PIN,led_state)
+        time.sleep(0.5)
+        led_state = not led_state
+    # turn off the LED
+    GPIO.output(LED_PIN,False)
+
 
 
 # ═══════════════════════════════════════════════════════════
@@ -279,7 +294,7 @@ class PhotoBooth:
 
 
         # ── state variables ────────────────────────────────
-        self.countdown_val   = COUNTDOWN_FROM
+        self.countdown_val   = SETUP_DELAY
         self.countdown_start = 0
         self.photos_pil      = []          # captured PIL Images
         self.photos_surf     = []          # pygame Surfaces (previews)
@@ -332,19 +347,34 @@ class PhotoBooth:
 
     # ─────────────────────────────────────────────────────────
     #  CAPTURE SEQUENCE  (runs in a background thread)
+    # in charge of sequencing the countdowns and photo captures.
     # ─────────────────────────────────────────────────────────
     def capture_sequence(self):
         self.photos_pil = []
-        for i in range(NUM_PHOTOS):
-            # Countdown before each photo
-            for t in range(INTER_PHOTO_DELAY, 0, -1):
-                self.photo_countdown = t
-                self.led_state = not self.led_state
-                GPIO.output(LED_PIN,self.led_state)
-                time.sleep(1)
 
+        for i in range(NUM_PHOTOS):
+            if (i==0) : #on the first loop, give the user some time to set up, with an on-screen countdown.
+                self.countdown_val = SETUP_DELAY
+                self.countdown_start = time.time()
+                self.state = self.STATE_COUNTDOWN
+                led_blink(SETUP_DELAY)
+            else :
+                self.countdown_val = INTER_PHOTO_DELAY
+                self.countdown_start = time.time()
+                self.state = self.STATE_COUNTDOWN
+                led_blink(INTER_PHOTO_DELAY)
+     
+
+            # for t in range(INTER_PHOTO_DELAY, 0, -1):
+            #     self.photo_countdown = t
+            #     self.led_state = not self.led_state
+            #     GPIO.output(LED_PIN,self.led_state)
+            #     time.sleep(1)
+            
+            # capture photo
             self.photo_countdown = 0
             self.flash_alpha = 255
+            self.state = self.STATE_CAPTURE
             img = self.take_photo()
             self.photos_pil.append(img)
 
@@ -352,8 +382,10 @@ class PhotoBooth:
             fname = datetime.now().strftime("photo_%Y%m%d_%H%M%S") + f"_{i+1}.jpg"
             img.save(os.path.join(OUTPUT_DIR, fname))
 
-            self.led_state = False
-            GPIO.output(LED_PIN,self.led_state)
+            # # turn off LED
+            # self.led_state = False
+            # GPIO.output(LED_PIN,self.led_state)
+            
             time.sleep(1)
 
         self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
@@ -381,7 +413,17 @@ class PhotoBooth:
         return rect
 
     # ─────────────────────────────────────────────────────────
-    #  SCREENS
+    #  SCREENS:
+    #   HOME (start)
+    #   COUNTDOWN (3...2...1...etc)
+    #   CAPTURE (taking photo)
+    #   STRIP (save or retry)
+    # ─────────────────────────────────────────────────────────
+    
+    # ─────────────────────────────────────────────────────────
+    # draw_home
+    # draws the graphical elements making up the start screen.
+    # returns the button for some reason (claude, explain?)
     # ─────────────────────────────────────────────────────────
     def draw_home(self):
         # Background gradient (simple two-tone)
@@ -389,19 +431,23 @@ class PhotoBooth:
         # Decorative circle accents
         pygame.draw.circle(self.screen, (30, 30, 60), (SCREEN_W - 80, 80), 120)
         pygame.draw.circle(self.screen, (30, 30, 60), (80, SCREEN_H - 80), 90)
-
+        # On-screen text
         draw_text_centred(self.screen, "PHOTO BOOTH",
                           self.font_large, WHITE, SCREEN_W // 2, SCREEN_H // 2 - 60)
         draw_text_centred(self.screen, "Touch START to begin",
                           self.font_small, (160, 160, 180),
                           SCREEN_W // 2, SCREEN_H // 2 - 10)
-
+        # Start Button
         start_rect = self.draw_button(
             "Start!", SCREEN_W // 2, SCREEN_H // 2 + 70,
             w=220, h=70, bg=GREEN, hover_bg=GREEN_DARK
         )
         return {"start": start_rect}
 
+    # ─────────────────────────────────────────────────────────
+    # draw_countdown
+    # draws a sequence of countdown numbers, set by self.countdown_value
+    # ─────────────────────────────────────────────────────────
     def draw_countdown(self):
         # Live camera preview as background
         frame = self.grab_preview_frame()
@@ -412,46 +458,51 @@ class PhotoBooth:
         overlay.fill((0, 0, 0, 200))
         self.screen.blit(overlay, (0, 0))
 
-        # Countdown number
+        # Calculate Countdown number
         elapsed = time.time() - self.countdown_start
-        remaining = max(0, COUNTDOWN_FROM - int(elapsed))
+        remaining = max(0, SETUP_DELAY - int(elapsed))
 
-        if remaining > 0:
-            draw_text_centred(self.screen, str(remaining),
-                              self.font_huge, COUNTDOWN_COL,
-                              SCREEN_W // 2, SCREEN_H // 2)
-            draw_text_centred(self.screen, "Get ready…",
-                              self.font_medium, WHITE,
-                              SCREEN_W // 2, SCREEN_H // 2 + 110)
-        else:
-            # Time's up – switch to capture
-            draw_text_centred(self.screen, "Smile!",
-                              self.font_large, COUNTDOWN_COL,
-                              SCREEN_W // 2, SCREEN_H // 2)
-            time.sleep(1)
-            self.state = self.STATE_CAPTURE
-            if not self.capturing:
-                self.capturing = True
-                t = threading.Thread(target=self.capture_sequence, daemon=True)
-                t.start()
+        # if remaining > 0:
+        draw_text_centred(self.screen, str(remaining),
+                            self.font_huge, COUNTDOWN_COL,
+                            SCREEN_W // 2, SCREEN_H // 2)
+        draw_text_centred(self.screen, "Get ready…",
+                            self.font_medium, WHITE,
+                            SCREEN_W // 2, SCREEN_H // 2 + 110)
+        # else:
+        #     # Time's up – switch to capture
+        #     draw_text_centred(self.screen, "Smile!",
+        #                       self.font_large, COUNTDOWN_COL,
+        #                       SCREEN_W // 2, SCREEN_H // 2)
+        #     self.state = self.STATE_CAPTURE
+            # if not self.capturing:
+            #     self.capturing = True
+            #     t = threading.Thread(target=self.capture_sequence, daemon=True)
+            #     t.start()
 
     def draw_capture(self):
+
+        draw_text_centred(self.screen, "Smile!",
+            self.font_large, COUNTDOWN_COL,
+            SCREEN_W // 2, SCREEN_H // 2)
+        time.sleep(1)
+
         # Live preview while capture thread works
         frame = self.grab_preview_frame()
         self.screen.blit(frame, (0, 0))
 
                 # Before each photo is captured, display another countdown sequence with some fun messages
-        if self.photo_countdown > 0:
-            draw_text_centred(self.screen, str(self.photo_countdown),
-                            self.font_huge, COUNTDOWN_COL,
-                            SCREEN_W // 2, SCREEN_H // 2)
-            draw_text_centred(self.screen, "Next photo in…",
-                            self.font_medium, WHITE,
-                            SCREEN_W // 2, SCREEN_H // 2 + 110)
-        else:
-            draw_text_centred(self.screen, "Smile!",
-                            self.font_large, COUNTDOWN_COL,
-                            SCREEN_W // 2, SCREEN_H // 2)
+        # if self.photo_countdown > 0:
+        #     draw_text_centred(self.screen, str(self.photo_countdown),
+        #                     self.font_huge, COUNTDOWN_COL,
+        #                     SCREEN_W // 2, SCREEN_H // 2)
+        #     draw_text_centred(self.screen, "Next photo in…",
+        #                     self.font_medium, WHITE,
+        #                     SCREEN_W // 2, SCREEN_H // 2 + 110)
+        # else:
+            # draw_text_centred(self.screen, "Smile!",
+            #             self.font_large, COUNTDOWN_COL,
+            #             SCREEN_W // 2, SCREEN_H // 2)
         
         # Flash effect
         if self.flash_alpha > 0:
@@ -460,13 +511,13 @@ class PhotoBooth:
             self.screen.blit(flash_surf, (0, 0))
             self.flash_alpha = max(0, self.flash_alpha - 25)
 
-        # Photo counter at top of screen
-        taken = len(self.photos_pil)
-        if (taken+1) < NUM_PHOTOS:
-            draw_text_centred(self.screen,
-                          f"Photo {taken + 1} of {NUM_PHOTOS}",
-                          self.font_medium, WHITE,
-                          SCREEN_W // 2, 40)
+        # # Photo counter at top of screen
+        # taken = len(self.photos_pil)
+        # if (taken+1) < NUM_PHOTOS:
+        #     draw_text_centred(self.screen,
+        #                   f"Photo {taken + 1} of {NUM_PHOTOS}",
+        #                   self.font_medium, WHITE,
+        #                   SCREEN_W // 2, 40)
         
 
 
@@ -531,7 +582,7 @@ class PhotoBooth:
         btn_rects = {}
 
         while True:
-            # ── Events ───────────────────────────────────────
+            # ── Handle Events ───────────────────────────────────────
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.shutdown()
@@ -546,12 +597,21 @@ class PhotoBooth:
                     else:
                         pos = event.pos
 
+                    # start button handler
                     if self.state == self.STATE_HOME:
                         if btn_rects.get("start") and \
                                 btn_rects["start"].collidepoint(pos):
-                            self.state = self.STATE_COUNTDOWN
-                            self.countdown_start = time.time()
+                            # self.state = self.STATE_COUNTDOWN
+                            # self.countdown_start = time.time()
+                            # start our countdown coordinator thread with thread protection
+                            if not self.capturing:
+                                self.capturing = True
+                                t = threading.Thread(target=self.capture_sequence, daemon=True)
+                                t.start()
+                            else:
+                                print(f"[PhotoBooth] Error: unable to start state machine")
 
+                    # save/restart button handlers
                     elif self.state == self.STATE_STRIP:
                         for key, rect in btn_rects.items():
                             if rect.collidepoint(pos):
