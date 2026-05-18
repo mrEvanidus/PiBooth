@@ -354,6 +354,7 @@ class PhotoBooth:
 
             self.led_state = False
             GPIO.output(LED_PIN,self.led_state)
+            time.sleep(1)
 
         self.strip_surface = build_strip(self.photos_pil, BORDERS[self.current_border])
         self.state = self.STATE_STRIP
