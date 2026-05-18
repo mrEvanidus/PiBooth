@@ -428,7 +428,6 @@ class PhotoBooth:
             draw_text_centred(self.screen, "Smile!",
                               self.font_large, COUNTDOWN_COL,
                               SCREEN_W // 2, SCREEN_H // 2)
-            time.sleep(1)
             self.state = self.STATE_CAPTURE
             if not self.capturing:
                 self.capturing = True
@@ -462,7 +461,8 @@ class PhotoBooth:
 
         # Photo counter at top of screen
         taken = len(self.photos_pil)
-        draw_text_centred(self.screen,
+        if (taken+1) < NUM_PHOTOS:
+            draw_text_centred(self.screen,
                           f"Photo {taken + 1} of {NUM_PHOTOS}",
                           self.font_medium, WHITE,
                           SCREEN_W // 2, 40)
