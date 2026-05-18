@@ -339,7 +339,8 @@ class PhotoBooth:
             # Countdown before each photo
             for t in range(INTER_PHOTO_DELAY, 0, -1):
                 self.photo_countdown = t
-                GPIO.output(LED_PIN,not self.led_state)
+                self.led_state = not self.led_state
+                GPIO.output(LED_PIN,self.led_state)
                 time.sleep(1)
 
             self.photo_countdown = 0
