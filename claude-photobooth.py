@@ -460,7 +460,7 @@ class PhotoBooth:
 
         # Calculate Countdown number
         elapsed = time.time() - self.countdown_start
-        remaining = max(0, SETUP_DELAY - int(elapsed))
+        remaining = max(0, self.countdown_val - int(elapsed))
 
         # if remaining > 0:
         draw_text_centred(self.screen, str(remaining),
