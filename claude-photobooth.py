@@ -218,7 +218,7 @@ def build_strip(photos_pil, border):
                       fill=ac, width=1)
 
     # ── date stamp at bottom ────────────────────────────────
-    date_str = datetime.now().strftime("%d %b %Y  |  %H:%M")
+    date_str = datetime.now().strftime("%d %b %Y")
     # Pillow default font is tiny – that's fine for a small stamp
     draw.text((outer_w // 2, outer_h - 22), date_str,
               fill=border["accent"], anchor="mm")
@@ -687,7 +687,7 @@ class PhotoBooth:
             print(f"[PhotoBooth] Save error: {e}")
             msg = "Save failed! Check terminal."
 
-        # On-screen confirmation
+        # On-screen confirmation once saved
         overlay = pygame.Surface((SCREEN_W, 60), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         self.screen.blit(overlay, (0, SCREEN_H // 2 - 30))
